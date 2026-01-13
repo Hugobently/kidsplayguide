@@ -4,13 +4,9 @@ import { FeaturedGames } from '@/components/home/FeaturedGames';
 import { GamesByAge } from '@/components/home/GamesByAge';
 import { AGE_GROUP_KEYS, AgeGroupKey } from '@/lib/age-groups';
 import { countBadges } from '@/lib/badges';
-import { Game, Category, GameCategory } from '@prisma/client';
+import type { GameWithCategories } from '@/types';
 
 export const dynamic = 'force-dynamic';
-
-type GameWithCategories = Game & {
-  categories: (GameCategory & { category: Category })[];
-};
 
 async function getFeaturedGames(): Promise<GameWithCategories[]> {
   const games = await db.game.findMany({

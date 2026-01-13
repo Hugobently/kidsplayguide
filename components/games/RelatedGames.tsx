@@ -1,9 +1,5 @@
-import { Game, Category, GameCategory } from '@prisma/client';
 import { GameCardCompact } from './GameCard';
-
-type GameWithCategories = Game & {
-  categories: (GameCategory & { category: Category })[];
-};
+import type { GameWithCategories } from '@/types';
 
 interface RelatedGamesProps {
   games: GameWithCategories[];

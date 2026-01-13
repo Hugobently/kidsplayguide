@@ -1,27 +1,20 @@
 import Link from 'next/link';
-import { Game, Category, GameCategory } from '@prisma/client';
 import { AGE_GROUPS, AgeGroupKey } from '@/lib/age-groups';
 import { GameCardCompact } from '../games/GameCard';
-
-type GameWithCategories = Game & {
-  categories: (GameCategory & { category: Category })[];
-};
+import type { GameWithCategories } from '@/types';
 
 interface GamesByAgeProps {
   gamesByAge: Record<AgeGroupKey, GameWithCategories[]>;
 }
 
-// Get gradient for section backgrounds
-function getAgeGradient(ageKey: AgeGroupKey): string {
-  const gradients: Record<AgeGroupKey, string> = {
-    '0-2': 'from-pink-50/70 to-transparent',
-    '2-4': 'from-amber-50/70 to-transparent',
-    '4-6': 'from-emerald-50/70 to-transparent',
-    '6-8': 'from-blue-50/70 to-transparent',
-    '8-10': 'from-purple-50/70 to-transparent',
-  };
-  return gradients[ageKey];
-}
+// Section background gradients (different from card gradients in utils.ts)
+const AGE_SECTION_GRADIENTS: Record<AgeGroupKey, string> = {
+  '0-2': 'from-pink-50/70 to-transparent',
+  '2-4': 'from-amber-50/70 to-transparent',
+  '4-6': 'from-emerald-50/70 to-transparent',
+  '6-8': 'from-blue-50/70 to-transparent',
+  '8-10': 'from-purple-50/70 to-transparent',
+};
 
 export function GamesByAge({ gamesByAge }: GamesByAgeProps) {
   const ageKeys = Object.keys(AGE_GROUPS) as AgeGroupKey[];
@@ -54,7 +47,7 @@ export function GamesByAge({ gamesByAge }: GamesByAgeProps) {
             return (
               <div
                 key={ageKey}
-                className={`relative rounded-2xl md:rounded-3xl overflow-hidden bg-gradient-to-r ${getAgeGradient(ageKey)} p-4 md:p-6`}
+                className={`relative rounded-2xl md:rounded-3xl overflow-hidden bg-gradient-to-r ${AGE_SECTION_GRADIENTS[ageKey]} p-4 md:p-6`}
               >
                 {/* Age Group Header - Compact on mobile */}
                 <div className="flex items-center justify-between mb-4">

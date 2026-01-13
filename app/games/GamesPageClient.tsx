@@ -1,17 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Game, Category, GameCategory } from '@prisma/client';
 import { AGE_GROUPS, AgeGroupKey, AGE_GROUP_KEYS } from '@/lib/age-groups';
 import { CategoryKey } from '@/lib/config/categories';
 import { GameGrid } from '@/components/games/GameGrid';
 import { CategoryFilter } from '@/components/filters/CategoryFilter';
 import { LoadMoreButton } from '@/components/ui/LoadMoreButton';
 import { GameGridSkeleton } from '@/components/ui/Skeleton';
-
-type GameWithCategories = Game & {
-  categories: (GameCategory & { category: Category })[];
-};
+import type { GameWithCategories } from '@/types';
 
 type PricingOption = 'all' | 'free' | 'paid';
 

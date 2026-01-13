@@ -1,10 +1,6 @@
-import { Game, Category, GameCategory } from '@prisma/client';
 import { GameCardCompact } from '../games/GameCard';
 import Link from 'next/link';
-
-type GameWithCategories = Game & {
-  categories: (GameCategory & { category: Category })[];
-};
+import type { GameWithCategories } from '@/types';
 
 interface FeaturedGamesProps {
   games: GameWithCategories[];

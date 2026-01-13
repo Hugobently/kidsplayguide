@@ -27,6 +27,11 @@ export type GameForCard = Game & {
 };
 
 /**
+ * Alias for GameForCard - used in many components.
+ */
+export type GameWithCategories = GameForCard;
+
+/**
  * Pricing model options.
  */
 export type PricingModel = 'free' | 'one-time' | 'subscription' | 'freemium';

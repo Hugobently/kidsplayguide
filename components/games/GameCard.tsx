@@ -3,66 +3,18 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Game, Category, GameCategory } from '@prisma/client';
 import { formatAgeRange, getAgeGroupInfo } from '@/lib/age-groups';
-
-type GameWithCategories = Game & {
-  categories: (GameCategory & { category: Category })[];
-};
+import { parseJsonArray, getAgeGradient, getAgePillClass, getCategoryFallback, getPricingConfig } from '@/lib/utils';
+import type { GameWithCategories } from '@/types';
 
 interface GameCardProps {
   game: GameWithCategories;
   size?: 'default' | 'large';
 }
 
-// Get age pill class based on age group
-function getAgePillClass(ageGroup: string): string {
-  const pillClasses: Record<string, string> = {
-    '0-2': 'age-pill-baby',
-    '2-4': 'age-pill-toddler',
-    '4-6': 'age-pill-preschool',
-    '6-8': 'age-pill-school',
-    '8-10': 'age-pill-tween',
-  };
-  return pillClasses[ageGroup] || 'age-pill-school';
-}
-
-// Get gradient background for card based on age group
-function getAgeGradient(ageGroup: string): string {
-  const gradients: Record<string, string> = {
-    '0-2': 'from-pink-100 to-rose-50',
-    '2-4': 'from-amber-100 to-yellow-50',
-    '4-6': 'from-emerald-100 to-green-50',
-    '6-8': 'from-blue-100 to-sky-50',
-    '8-10': 'from-purple-100 to-violet-50',
-  };
-  return gradients[ageGroup] || 'from-gray-100 to-gray-50';
-}
-
-// Helper to parse JSON arrays
-function parseJsonArray(value: string | null | undefined): string[] {
-  if (!value) return [];
-  try {
-    return JSON.parse(value);
-  } catch {
-    return [];
-  }
-}
-
 // Category-aware fallback with beautiful gradients
 function FallbackImage({ categoryKey, size = 'default' }: { categoryKey?: string; size?: 'default' | 'compact' }) {
-  const fallbacks: Record<string, { emoji: string; gradient: string }> = {
-    learning: { emoji: '📚', gradient: 'from-blue-200 via-indigo-100 to-purple-100' },
-    puzzle: { emoji: '🧩', gradient: 'from-purple-200 via-pink-100 to-rose-100' },
-    creative: { emoji: '🎨', gradient: 'from-amber-200 via-orange-100 to-yellow-100' },
-    adventure: { emoji: '🗺️', gradient: 'from-emerald-200 via-teal-100 to-cyan-100' },
-    music: { emoji: '🎵', gradient: 'from-pink-200 via-rose-100 to-red-100' },
-    matching: { emoji: '🔍', gradient: 'from-cyan-200 via-sky-100 to-blue-100' },
-    coloring: { emoji: '🖌️', gradient: 'from-red-200 via-pink-100 to-orange-100' },
-    counting: { emoji: '🔢', gradient: 'from-violet-200 via-purple-100 to-indigo-100' },
-  };
-
-  const fallback = fallbacks[categoryKey || ''] || { emoji: '🎮', gradient: 'from-gray-200 via-gray-100 to-white' };
+  const fallback = getCategoryFallback(categoryKey);
   const emojiSize = size === 'compact' ? 'text-4xl' : 'text-6xl';
 
   return (
@@ -95,13 +47,7 @@ export function GameCard({ game, size = 'default' }: GameCardProps) {
   const platforms = parseJsonArray(game.platforms);
   const primaryCategory = game.categories[0]?.category?.key;
 
-  const pricingConfig = {
-    free: { label: 'Free', class: 'text-secondary font-bold' },
-    'one-time': { label: 'Paid', class: 'text-text-muted' },
-    subscription: { label: 'Sub', class: 'text-coral' },
-    freemium: { label: 'Free+', class: 'text-secondary' },
-  };
-  const pricing = pricingConfig[game.pricingModel as keyof typeof pricingConfig] || { label: game.pricingModel, class: 'text-text-muted' };
+  const pricing = getPricingConfig(game.pricingModel);
 
   const isLarge = size === 'large';
 

@@ -1,10 +1,6 @@
-import { Game, Category, GameCategory } from '@prisma/client';
 import { GameCard } from './GameCard';
 import { EmptyState } from '../ui/EmptyState';
-
-type GameWithCategories = Game & {
-  categories: (GameCategory & { category: Category })[];
-};
+import type { GameWithCategories } from '@/types';
 
 interface GameGridProps {
   games: GameWithCategories[];

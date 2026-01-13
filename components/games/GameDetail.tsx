@@ -1,28 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Game, GameSource, Category, Skill, Theme, GameCategory, GameSkill, GameTheme } from '@prisma/client';
 import { formatAgeRange, getAgeGroupInfo } from '@/lib/age-groups';
+import { parseJsonArray, getAgeGradient } from '@/lib/utils';
 import { BadgeWithDescription } from './BadgeDisplay';
-
-type GameWithRelations = Game & {
-  source: GameSource | null;
-  categories: (GameCategory & { category: Category })[];
-  skills: (GameSkill & { skill: Skill })[];
-  themes: (GameTheme & { theme: Theme })[];
-};
+import type { GameWithRelations } from '@/types';
 
 interface GameDetailProps {
   game: GameWithRelations;
-}
-
-// Helper to parse JSON arrays
-function parseJsonArray<T>(value: string | null | undefined): T[] {
-  if (!value) return [];
-  try {
-    return JSON.parse(value);
-  } catch {
-    return [];
-  }
 }
 
 // Star rating component
@@ -48,18 +32,6 @@ function StarRating({ rating }: { rating: number }) {
       <span className="text-xl font-bold text-text">{rating.toFixed(1)}</span>
     </div>
   );
-}
-
-// Get gradient for age group
-function getAgeGradient(ageGroup: string): string {
-  const gradients: Record<string, string> = {
-    '0-2': 'from-pink-100 to-rose-50',
-    '2-4': 'from-amber-100 to-yellow-50',
-    '4-6': 'from-emerald-100 to-green-50',
-    '6-8': 'from-blue-100 to-sky-50',
-    '8-10': 'from-purple-100 to-violet-50',
-  };
-  return gradients[ageGroup] || 'from-gray-100 to-gray-50';
 }
 
 export function GameDetail({ game }: GameDetailProps) {
