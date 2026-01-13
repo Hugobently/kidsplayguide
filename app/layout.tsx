@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://kidsplayguide.vercel.app'),
   title: {
     default: 'KidsPlayGuide - Safe & Fun Online Games for Kids',
     template: '%s | KidsPlayGuide',
