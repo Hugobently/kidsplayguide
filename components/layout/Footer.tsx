@@ -106,7 +106,7 @@ export function Footer() {
               © {currentYear} KidsPlayGuide
             </p>
             <p className="text-text-muted text-2xs md:text-xs">
-              40+ curated games • 100% safe
+              100+ curated games • 100% safe
             </p>
           </div>
         </div>
