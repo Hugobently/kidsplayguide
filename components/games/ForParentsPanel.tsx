@@ -116,8 +116,8 @@ export function ForParentsPanel({ game }: ForParentsPanelProps) {
         For Parents
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {infoItems.map((item, index) => (
-          <div key={index} className="flex items-start gap-3">
+        {infoItems.map((item) => (
+          <div key={item.label} className="flex items-start gap-3">
             <span className="text-xl">{item.icon}</span>
             <div>
               <p className="text-sm text-text-muted">{item.label}</p>

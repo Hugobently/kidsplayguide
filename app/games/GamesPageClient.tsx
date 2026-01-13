@@ -8,10 +8,9 @@ import { CategoryFilter } from '@/components/filters/CategoryFilter';
 import { LoadMoreButton } from '@/components/ui/LoadMoreButton';
 import { GameGridSkeleton } from '@/components/ui/Skeleton';
 import type { GameWithCategories } from '@/types';
+import { GAMES_PER_PAGE } from '@/lib/config/constants';
 
 type PricingOption = 'all' | 'free' | 'paid';
-
-const GAMES_PER_PAGE = 12;
 
 export function GamesPageClient() {
   const [games, setGames] = useState<GameWithCategories[]>([]);
@@ -20,6 +19,7 @@ export function GamesPageClient() {
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   // Filters
   const [selectedAge, setSelectedAge] = useState<AgeGroupKey | null>(null);
@@ -29,6 +29,7 @@ export function GamesPageClient() {
 
   const fetchGames = useCallback(
     async (reset = false) => {
+      setError(null);
       const newOffset = reset ? 0 : offset;
       const params = new URLSearchParams();
       params.set('offset', newOffset.toString());
@@ -60,8 +61,9 @@ export function GamesPageClient() {
         }
         setHasMore(data.hasMore);
         setTotalCount(data.total || data.games.length);
-      } catch (error) {
-        console.error('Failed to fetch games:', error);
+      } catch (err) {
+        console.error('Failed to fetch games:', err);
+        setError('Failed to load games. Please try again.');
       }
     },
     [offset, selectedAge, categories, pricing, search]
@@ -249,10 +251,32 @@ export function GamesPageClient() {
           )}
         </div>
 
+        {/* Error State */}
+        {error && !loading && (
+          <div className="text-center py-12 px-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
+              <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-text mb-2">Something went wrong</h3>
+            <p className="text-text-muted mb-4">{error}</p>
+            <button
+              onClick={() => fetchGames(true)}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Try Again
+            </button>
+          </div>
+        )}
+
         {/* Results */}
         {loading ? (
           <GameGridSkeleton count={8} />
-        ) : (
+        ) : !error && (
           <>
             <GameGrid
               games={games}

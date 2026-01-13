@@ -52,9 +52,9 @@ export function BadgeList({
 
   return (
     <div className="flex flex-wrap gap-1.5">
-      {visibleBadges.map((badge, index) => (
+      {visibleBadges.map((badge) => (
         <Badge
-          key={index}
+          key={`${badge.icon}-${badge.label}`}
           icon={badge.icon}
           label={badge.label}
           description={badge.description}

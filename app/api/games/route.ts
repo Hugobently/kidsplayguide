@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { Prisma } from '@prisma/client';
-
-const GAMES_PER_PAGE = 12;
+import { GAMES_PER_PAGE, MAX_GAMES_LIMIT } from '@/lib/config/constants';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
 
     const offset = parseInt(searchParams.get('offset') || '0', 10);
-    const limit = Math.min(parseInt(searchParams.get('limit') || String(GAMES_PER_PAGE), 10), 50);
+    const limit = Math.min(parseInt(searchParams.get('limit') || String(GAMES_PER_PAGE), 10), MAX_GAMES_LIMIT);
     const ageGroupsParam = searchParams.get('ageGroups');
     const categoriesParam = searchParams.get('categories');
     const pricing = searchParams.get('pricing');

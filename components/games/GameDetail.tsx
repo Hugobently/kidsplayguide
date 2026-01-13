@@ -274,7 +274,7 @@ export function GameDetail({ game }: GameDetailProps) {
                   </h3>
                   <ul className="space-y-3">
                     {pros.map((pro, i) => (
-                      <li key={i} className="flex items-start gap-3 text-text">
+                      <li key={`pro-${i}-${pro.slice(0, 20)}`} className="flex items-start gap-3 text-text">
                         <span className="text-secondary mt-0.5 text-lg">✓</span>
                         <span>{pro}</span>
                       </li>
@@ -293,7 +293,7 @@ export function GameDetail({ game }: GameDetailProps) {
                   </h3>
                   <ul className="space-y-3">
                     {cons.map((con, i) => (
-                      <li key={i} className="flex items-start gap-3 text-text">
+                      <li key={`con-${i}-${con.slice(0, 20)}`} className="flex items-start gap-3 text-text">
                         <span className="text-coral mt-0.5 text-lg">✗</span>
                         <span>{con}</span>
                       </li>
