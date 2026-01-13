@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// GAME - Main entity
+// ============================================
+model Game {
+  id                  String   @id @default(cuid())
+  slug                String   @unique
+
+  // ========== BASIC INFO ==========
+  title               String
+  description         String?  @db.Text
+  shortDescription    String?  @db.VarChar(300)
+
+  // ========== AGE ==========
+  minAge              Int      @default(0)
+  maxAge              Int      @default(10)
+  ageGroup            String   @default("4-6")  // Valid: 0-2, 2-4, 4-6, 6-8, 8-10
+
+  // ========== CATEGORIZATION (Normalized) ==========
+  categories          GameCategory[]
+  skills              GameSkill[]
+  themes              GameTheme[]
+
+  // ========== SOURCE & URL ==========
+  gameUrl             String
+  sourceId            String?
+  source              GameSource? @relation(fields: [sourceId], references: [id])
+  embedAllowed        Boolean  @default(false)
+  embedUrl            String?
+
+  // ========== MEDIA ==========
+  thumbnailUrl        String?
+  screenshots         String   @default("[]")   // JSON array of URLs
+
+  // ========== GATE CRITERIA ==========
+  hasNoInGameAds            Boolean @default(true)
+  hasRespectfulMonetization Boolean @default(true)
+  hasNoContactWithStrangers Boolean @default(true)
+  hasNoManipulativeDesign   Boolean @default(true)
+  isAgeAppropriate          Boolean @default(true)
+  passesGateCriteria        Boolean @default(false)  // Computed
+
+  // ========== TRUST & ACTIVATION ==========
+  trustTier                 String  @default("TIER_3")
+  qualityConfidence         String  @default("LOW")   // HIGH, MEDIUM, LOW
+  isActive                  Boolean @default(false)
+  manuallyApproved          Boolean @default(false)
+
+  // ========== PRICING ==========
+  pricingModel              String  @default("free")  // free, one-time, subscription, freemium
+  pricingNote               String?                   // "Requires Apple Arcade"
+  pricingUrl                String?                   // Link to purchase
+
+  // ========== PARENT INFO ==========
+  requiresAccount           Boolean @default(false)
+  accountNote               String?                   // "Requires Microsoft account"
+  hasLeaderboards           Boolean @default(false)
+  supportsMultipleProfiles  Boolean @default(false)
+
+  // ========== PRACTICAL INFO ==========
+  sessionLength             String  @default("medium")  // quick, medium, long
+  platforms                 String  @default("[\"web\"]") // JSON array
+  requiresInternet          Boolean @default(true)
+  worksOffline              Boolean @default(false)
+  audioLanguage             String  @default("none")    // none, english, multiple
+  requiresLanguageUnderstanding Boolean @default(false)
+
+  // ========== BADGES ==========
+  badgeEducational          Boolean @default(false)
+  badgeCreative             Boolean @default(false)
+  badgePopular              Boolean @default(false)
+  badgePolished             Boolean @default(false)
+  badgeTrustedSource        Boolean @default(false)  // Auto: trustTier === 'TIER_1'
+  badgeOfflineFriendly      Boolean @default(false)  // Auto: worksOffline === true
+  badgeQuickPlay            Boolean @default(false)  // Auto: sessionLength === 'quick'
+  badgeSiblingFriendly      Boolean @default(false)  // Auto: supportsMultipleProfiles === true
+
+  // ========== EDITORIAL ==========
+  whyWePicked               String? @db.Text
+  parentTip                 String? @db.Text
+  parentInfo                String? @db.Text           // Detailed "What parents should know" section
+  pros                      String  @default("[]")     // JSON array of pros
+  cons                      String  @default("[]")     // JSON array of cons
+  rating                    Float   @default(0)        // 0-5 rating score
+  developerName             String?                    // Game developer/publisher
+  featured                  Boolean @default(false)    // Featured on homepage
+  editorChoice              Boolean @default(false)    // Editor's choice badge
+
+  // ========== LINK HEALTH ==========
+  lastLinkCheck             DateTime?
+  linkStatus                String  @default("unknown")  // ok, broken, redirected
+  consecutiveLinkFailures   Int     @default(0)
+
+  // ========== METADATA ==========
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  @@index([ageGroup])
+  @@index([isActive])
+  @@index([trustTier])
+  @@index([linkStatus])
+  @@index([sourceId])
+}
+
+// ============================================
+// GAME SOURCE - PBS Kids, CBeebies, etc.
+// ============================================
+model GameSource {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  websiteUrl  String
+  trustTier   String   @default("TIER_3")
+  isActive    Boolean  @default(true)
+
+  games       Game[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================
+// CATEGORY - Learning, Puzzle, Creative, etc.
+// ============================================
+model Category {
+  id    String @id @default(cuid())
+  key   String @unique   // learning, puzzle, creative, etc.
+  name  String           // Learning, Puzzles, Creative, etc.
+  icon  String           // Emoji icon
+
+  games GameCategory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GameCategory {
+  gameId     String
+  categoryId String
+  game       Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, categoryId])
+  @@index([categoryId])
+}
+
+// ============================================
+// SKILL - Math, Reading, Logic, etc.
+// ============================================
+model Skill {
+  id    String @id @default(cuid())
+  key   String @unique   // math, reading, logic, etc.
+  name  String           // Math, Reading, Logic, etc.
+
+  games GameSkill[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GameSkill {
+  gameId  String
+  skillId String
+  game    Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, skillId])
+  @@index([skillId])
+}
+
+// ============================================
+// THEME - Animals, Dinosaurs, Space, etc.
+// ============================================
+model Theme {
+  id    String @id @default(cuid())
+  key   String @unique   // animals, dinosaurs, space, etc.
+  name  String           // Animals, Dinosaurs, Space, etc.
+
+  games GameTheme[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GameTheme {
+  gameId  String
+  themeId String
+  game    Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  theme   Theme  @relation(fields: [themeId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, themeId])
+  @@index([themeId])
+}
+
+// ============================================
+// CURATION LOG - Audit trail
+// ============================================
+model CurationLog {
+  id        String   @id @default(cuid())
+  gameId    String?
+  action    String   // discovered, activated, deactivated, link_check, enhanced
+  source    String   // cron, manual, ai
+  details   String?  @db.Text
+  success   Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+
+  @@index([gameId])
+  @@index([action])
+  @@index([createdAt])
+}
